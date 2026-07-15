@@ -8,6 +8,7 @@ import '../widgets/pixel_button.dart';
 import '../widgets/pixel_text_field.dart';
 import 'login_screen.dart';
 import '../services/AuthService.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -20,9 +21,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _contrasennaController = TextEditingController();
   final _confirmarContrasennaController = TextEditingController();
   final _documentoController = TextEditingController();
-  final _rolController = TextEditingController();
-  final _cursoController = TextEditingController();
-  final _puntosController = TextEditingController();
+
+  List<Map<String, dynamic>> _cursos = [];
+  int? _cursoSeleccionadoId;
+  bool _isLoadingCursos = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarCursos();
+  }
+
+  Future<void> _cargarCursos() async {
+    try {
+      final cursoService = AuthService();
+      final cursosData = await cursoService.getCursos();
+      setState(() {
+        _cursos = cursosData;
+        _isLoadingCursos = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCursos = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -30,24 +53,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _contrasennaController.dispose();
     _confirmarContrasennaController.dispose();
     _documentoController.dispose();
-    _rolController.dispose();
-    _cursoController.dispose();
-    _puntosController.dispose();
     super.dispose();
   }
 
-  void _onRegister() async  {
+  void _limpiarFormulario() {
+    _nombreController.clear();
+    _documentoController.clear();
+    _contrasennaController.clear();
+    _confirmarContrasennaController.clear();
+
+    setState(() {
+      _cursoSeleccionadoId = null;
+    });
+  }
+
+  void _onRegister() async {
+    if (_cursoSeleccionadoId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Por favor selecciona un curso',
+            style: AppTheme.pixelBody(size: 8, color: Colors.white),
+          ),
+          backgroundColor: AppColors.softPinkDark,
+        ),
+      );
+      return;
+    }
+
+    if (_contrasennaController.text != _confirmarContrasennaController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Las contrasennas no coinciden',
+            style: AppTheme.pixelBody(size: 8, color: Colors.white),
+          ),
+          backgroundColor: AppColors.softPinkDark,
+        ),
+      );
+      return;
+    }
+
     final authService = AuthService();
     final bool success = await authService.registrarUsuario(
       _documentoController.text,
       _nombreController.text,
-      _rolController.text,
-      int.parse(_cursoController.text),
+      _cursoSeleccionadoId!,
       _contrasennaController.text,
-      int.parse(_puntosController.text),
-      );
+    );
+    if (!mounted) return;
 
     if (success) {
+      _limpiarFormulario();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -69,8 +126,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +153,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 14),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'curso',
+                          style: AppTheme.pixelBody(
+                            size: 8,
+                            color: AppColors.oliveGreen,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        _isLoadingCursos
+                            ? const CircularProgressIndicator()
+                            : Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: Colors.white,
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: _cursoSeleccionadoId,
+                                    isExpanded: true,
+                                    hint: const Text('Selecciona tu curso'),
+                                    items: _cursos.map((curso) {
+                                      return DropdownMenuItem<int>(
+                                        value: (curso['id_curso'] as int),
+                                        child: Text(
+                                          curso['nombreCurso'].toString(),
+                                          style: AppTheme.pixelBody(
+                                            size: 8,
+                                            color: AppColors.oliveGreen,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (int? value) {
+                                      setState(() {
+                                        _cursoSeleccionadoId = value;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
                     PixelTextField(
-                      label: 'Nombre',
-                      controller: _nombreController,
-                      hint: 'Tu nombre',
+                      label: 'Contrasena',
+                      controller: _contrasennaController,
+                      hint: '********',
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 24),
+                    PixelTextField(
+                      label: 'Confirmar Contrasena',
+                      controller: _confirmarContrasennaController,
+                      hint: '********',
+                      obscureText: true,
                     ),
                     const SizedBox(height: 24),
                     PixelButton(

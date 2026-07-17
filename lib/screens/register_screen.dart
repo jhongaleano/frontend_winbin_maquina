@@ -7,7 +7,8 @@ import '../widgets/nature_background.dart';
 import '../widgets/pixel_button.dart';
 import '../widgets/pixel_text_field.dart';
 import 'login_screen.dart';
-import '../services/AuthService.dart';
+import '../poviders/AuthProvider.dart';
+import 'package:provider/provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -34,8 +35,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _cargarCursos() async {
     try {
-      final cursoService = AuthService();
-      final cursosData = await cursoService.getCursos();
+      final authProvider = context.read<AuthProvider>();
+      final cursosData = await authProvider.cargarCursos();
       setState(() {
         _cursos = cursosData;
         _isLoadingCursos = false;
@@ -94,12 +95,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    final authService = AuthService();
-    final bool success = await authService.registrarUsuario(
-      _documentoController.text,
-      _nombreController.text,
-      _cursoSeleccionadoId!,
-      _contrasennaController.text,
+    final authProvider = context.read<AuthProvider>();
+    final bool success = await authProvider.registrarUsuario(
+      documento: _documentoController.text,
+      nombre: _nombreController.text,
+      cursoId: _cursoSeleccionadoId!,
+      contrasenna: _contrasennaController.text,
     );
     if (!mounted) return;
 

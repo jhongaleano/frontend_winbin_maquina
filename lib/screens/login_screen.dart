@@ -7,7 +7,10 @@ import '../widgets/nature_background.dart';
 import '../widgets/pixel_button.dart';
 import '../widgets/pixel_text_field.dart';
 import 'register_screen.dart';
-import '../services/AuthService.dart';
+import '../poviders/AuthProvider.dart';
+import 'package:provider/provider.dart';
+import 'CamaraScreen.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -27,13 +30,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _onLogin() async {
-    final authService = AuthService();
-    final bool success = await authService.login(
+    final authProvider = context.read<AuthProvider>();
+    final bool exito = await authProvider.iniciarSesion(
       _documentoController.text,
       _contrasennaController.text,
     );
 
-    if (success) {
+    if (!mounted) return;
+
+    if (exito) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -41,6 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
             style: AppTheme.pixelBody(size: 8, color: Colors.white),
           ),
           backgroundColor: AppColors.oliveGreen,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => const CameraScreen(),
         ),
       );
     } else {
@@ -93,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute<void>(
-                            builder: (_) => const RegisterScreen(),
+                            builder: (_) => const RegisterScreen()
                           ),
                         );
                       },

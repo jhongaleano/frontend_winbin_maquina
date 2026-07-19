@@ -2,11 +2,12 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart'; 
 import 'package:cross_file/cross_file.dart';
 import 'dart:convert';
+import 'package:front_winbin/models/ia_models.dart';
 
 class IAservice {
 
   static const String baseUrl = 'http://127.0.0.1:8000/api';
-  static Future<Map<String, dynamic>?> analizarImagen({
+  static Future<AnalisisIAResponse?> analizarImagen({
     required XFile image,
     required String idSesion,
     required String token,
@@ -36,7 +37,7 @@ class IAservice {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         print("¡Éxito! Respuesta de Python: ${response.body}");
-        return data;
+        return AnalisisIAResponse.fromJson(data);
       } else {
         print('Error al analizar imagen: ${response.statusCode} - ${response.body}');
         return null;

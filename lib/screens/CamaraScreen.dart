@@ -83,8 +83,8 @@ class _CameraScreenState extends State<CameraScreen> {
         final resultado = iaProvider.resultadoIA;
 
         if (exito && resultado != null) {
-          String objeto = resultado['objeto_detectado'];
-          num confianza = resultado['acertacion_confianza'];
+          String objeto = resultado.objetoDetectado;
+          num confianza = resultado.acertacionConfianza;
           _mostrarSnackBar(
             '¡Éxito! Detectado: $objeto ($confianza%)',
             backgroundColor: Colors.green.shade700,
@@ -95,8 +95,8 @@ class _CameraScreenState extends State<CameraScreen> {
           await authProvider.obtenerPerfilUsuario();
 
         } else if (resultado != null &&
-            resultado['status'] == 'no_reciclable') {
-          String mensaje = resultado['msg'];
+            resultado.status == 'no_reciclable') {
+          String mensaje = resultado.msg ?? "No es reciclable";
 
           _mostrarSnackBar(
             mensaje,

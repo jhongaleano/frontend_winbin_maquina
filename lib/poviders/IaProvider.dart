@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import '../services/IaService.dart';
+import '../models/ia_models.dart';
 
 class IaProvider extends ChangeNotifier {
   bool _cargandoIA = false;
   bool get cargandoIA => _cargandoIA;
 
  
-  Map<String, dynamic>? _resultadoIA;
-  Map<String, dynamic>? get resultadoIA => _resultadoIA;
+  AnalisisIAResponse? _resultadoIA;
+  AnalisisIAResponse? get resultadoIA => _resultadoIA;
 
   Future<bool> procesarReciclajeDeCamara({
     required XFile fotoCapturada,
@@ -30,12 +31,12 @@ class IaProvider extends ChangeNotifier {
       if (respuesta != null) {
         _resultadoIA = respuesta;
 
-        if (respuesta['status'] == 'éxito') {
+        if (respuesta.status == 'éxito') {
           print("¡Éxito! Objeto válido detectado y puntaje registrado en Spring Boot.");
           notifyListeners();
           return true; 
-        } else if (respuesta['status'] == 'no_reciclable') {
-          print("Atención: El objeto no es reciclable -> ${respuesta['msg']}");
+        } else if (respuesta.status == 'no_reciclable') {
+          print("Atención: El objeto no es reciclable -> ${respuesta.status}");
           notifyListeners();
           return false; 
         }

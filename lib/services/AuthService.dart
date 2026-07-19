@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class AuthService {
   static const String baseUrl = 'http://localhost:8080/api';
@@ -177,6 +177,11 @@ class AuthService {
     final url = Uri.parse('$baseUrl/DetalleSession');
 
     try {
+
+      print('Documento: $documento');
+      print('ID Periodo: $idPeriodo');
+      print('Token: $token');
+      
       final response = await http.post(
         url,
         headers: 

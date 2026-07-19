@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_winbin/services/AuthService.dart';
+import 'package:front_winbin/models/auth_models.dart';
+
+
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -12,14 +15,17 @@ class AuthProvider extends ChangeNotifier {
   String? _token;
   String? get token => _token;
 
-  String? _idperiodo;
-  String? get idperiodo => _idperiodo;
+  String? _nombrePeriodo;
+  String? get nombrePeriodo => _nombrePeriodo;
+
+  String? _idPeriodo;
+  String? get idPeriodo => _idPeriodo;
 
   String? _idSesion;
   String? get idSesion => _idSesion;
 
-  Map<String, dynamic>? _usuarioActual;
-  Map<String, dynamic>? get usuarioActual => _usuarioActual;
+  UsuarioPerfil? _usuarioActual;
+  UsuarioPerfil? get usuarioActual => _usuarioActual;
 
   static const String _keyToken = 'jwt_token';
 
@@ -27,30 +33,32 @@ class AuthProvider extends ChangeNotifier {
     _setCargando(true);
 
     try {
-      final response = await _authService.login(documento, contrasenna);
+      final LoginResponse? loginResponse = await _authService.login(documento, contrasenna);
 
-      if (response != null && response.containsKey('token')) {
-        _token = response['token'];
+      if (loginResponse != null && loginResponse.token.isNotEmpty) {
+        _token = loginResponse.token;
         await _storage.write(key: _keyToken, value: _token);
 
-        final periodoData = await cargarPeriodo();
+        final periodo  = await cargarPeriodo();
 
-        if (periodoData != null && periodoData.containsKey('id_periodo')) {
-          _idperiodo = periodoData['id_periodo'].toString();
+        if (periodo != null) {
+          _nombrePeriodo = periodo.nombrePeriodo;
+          _idPeriodo = periodo.idPeriodo;
         }
-
-        final sesionData = await _authService.detallesSession(
+        
+        if (_idPeriodo != null && _token != null) {
+        final  sesionData = await _authService.detalleSession(
             documento: documento,
-            idPeriodo: _idperiodo!,
+            idPeriodo: _idPeriodo!,
             token: _token!,
           );
 
-          if (sesionData != null && sesionData.containsKey('id_session')) {
-            _idSesion = sesionData['id_session'].toString();
+          if (sesionData != null && sesionData.idSesion != null) {
+            _idSesion = sesionData.idSesion.toString();
 
             print("ID de sesión: $_idSesion");
           }
-
+        }
         await obtenerPerfilUsuario();
 
         _setCargando(false);
@@ -79,7 +87,7 @@ class AuthProvider extends ChangeNotifier {
       if (perfil != null) {
         _usuarioActual = perfil;  
         notifyListeners();       
-        print("Perfil recargado exitosamente. Puntos actuales: ${_usuarioActual?['puntos']}");
+        print("Perfil recargado exitosamente. Puntos actuales: ${_usuarioActual?.puntos}");
       } else {
         print("No se pudo obtener el perfil desde AuthService.");
       }
@@ -111,11 +119,11 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>> cargarCursos() async {
+  Future<List<Curso>?> cargarCursos() async {
     return await _authService.getCursos();
   }
 
-  Future<Map<String, dynamic>?> cargarPeriodo() async {
+  Future<Periodo?> cargarPeriodo() async {
     String? tokenActual = await obtenerToken();
 
     if (tokenActual == null) {
@@ -124,7 +132,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final response = await _authService.getPeriodo(token: tokenActual);
-    if (response != null && response.containsKey('id_periodo')) {
+    if (response != null ) {
       return response;
     }
     return null;
@@ -139,7 +147,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _storage.delete(key: _keyToken);
     _token = null;
-    _idperiodo = null;
+    _nombrePeriodo = null;
     _usuarioActual = null;
 
     print("El usuario ha cerrado sesión");

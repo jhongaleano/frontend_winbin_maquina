@@ -9,6 +9,7 @@ import '../widgets/pixel_text_field.dart';
 import 'login_screen.dart';
 import '../poviders/AuthProvider.dart';
 import 'package:provider/provider.dart';
+import '../models/auth_models.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmarContrasennaController = TextEditingController();
   final _documentoController = TextEditingController();
 
-  List<Map<String, dynamic>> _cursos = [];
+  List<Curso> _cursos = [];
   int? _cursoSeleccionadoId;
   bool _isLoadingCursos = true;
 
@@ -38,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final authProvider = context.read<AuthProvider>();
       final cursosData = await authProvider.cargarCursos();
       setState(() {
-        _cursos = cursosData;
+        _cursos = cursosData!;
         _isLoadingCursos = false;
       });
     } catch (e) {
@@ -109,7 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Cuenta creada para ${_documentoController.text}',
+            'Cuenta creada ',
             style: AppTheme.pixelBody(size: 8, color: Colors.white),
           ),
           backgroundColor: AppColors.oliveGreen,
@@ -183,9 +184,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     hint: const Text('Selecciona tu curso'),
                                     items: _cursos.map((curso) {
                                       return DropdownMenuItem<int>(
-                                        value: (curso['id_curso'] as int),
+                                        value: (curso.idCurso),
                                         child: Text(
-                                          curso['nombreCurso'].toString(),
+                                          curso.nombre,
                                           style: AppTheme.pixelBody(
                                             size: 8,
                                             color: AppColors.oliveGreen,

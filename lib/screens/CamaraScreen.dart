@@ -144,13 +144,13 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final usuario = authProvider.usuarioActual;
-    final idPeriodo = authProvider.idperiodo ?? 'Sin período';
+    final periodo = authProvider.nombrePeriodo;
 
-    final String nombre = usuario?['nombre'] ?? 'Usuario';
-    final String avatarUrl = usuario?['avatarUrl'] ?? '';
-    final int puntos = usuario?['puntos'] ?? 0;
-    final String rol = usuario?['rol'] ?? 'USER';
-    final String nombreCurso = usuario?['curso']?['nombreCurso'] ?? 'Sin curso';
+    final String nombre = usuario?.nombre ?? 'Usuario';
+    final String avatarUrl = usuario?.avatarUrl ?? '';
+    final int puntos = usuario?.puntos ?? 0;
+    final String rol = usuario?.rol ?? 'USER';
+    final String nombreCurso = usuario?.curso?.nombre ?? 'Sin curso' ;
 
     return Scaffold(
       appBar: AppBar(
@@ -205,7 +205,7 @@ class _CameraScreenState extends State<CameraScreen> {
                         ),
                       ),
                       Text(
-                        'Período: $idPeriodo',
+                        'Periodo: $periodo',
                         style: TextStyle(
                           color: Colors.teal.shade200,
                           fontSize: 11,

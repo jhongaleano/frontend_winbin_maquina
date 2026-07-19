@@ -29,12 +29,7 @@ class Curso {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'nombreCurso': nombre,
-      'puntosTotales': puntosTotales,
-    };
-  }
+  
 }
 
 
@@ -71,6 +66,8 @@ class UsuarioPerfil {
       rol: json['rol'] ?? 'USER',
     );
   }
+
+  
 }
 
 class Periodo {
@@ -87,9 +84,14 @@ class Periodo {
     return Periodo(
       idPeriodo: json['id_periodo'] ?? '',
       nombrePeriodo: json['nombrePeriodo'] ?? '',
-      fechaInicio: json['fechaInicio'] ?? '',
-      fechaFinal: json['fechaFin'] ?? '',
-      activo: json['activo'],
+      fechaInicio: json['fechaInicio'] != null 
+          ? DateTime.parse(json['fechaInicio']) 
+          : DateTime.now(), 
+      fechaFinal: json['fechaFin'] != null 
+          ? DateTime.parse(json['fechaFin']) 
+          : DateTime.now(),
+      activo: json['activo']?? false,
     );
   }
+
 }

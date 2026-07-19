@@ -1,40 +1,50 @@
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart'; 
+import 'package:cross_file/cross_file.dart';
+import 'dart:convert';
+import 'package:front_winbin/models/ia_models.dart';
 
 class IAservice {
 
-  static const String baseUrl = 'http://localhost:8080/api';
-  static Future<String?> analizarImagen({
-    required File image,
-    required int idSesion,
-    required String token
-    
+  static const String baseUrl = 'http://127.0.0.1:8000/api';
+  static Future<AnalisisIAResponse?> analizarImagen({
+    required XFile image,
+    required String idSesion,
+    required String token,
   }) async {
     final url = Uri.parse('$baseUrl/ia/analizar');
     var request = http.MultipartRequest('POST', url);
 
     request.headers['Authorization'] = 'Bearer $token';
-    request.fields['id_sesion'] = idSesion.toString();
-
-    var multipartFile = await http.MultipartFile.fromPath(
-      'imagen',
-      image.path,
-    );
-    request.files.add(multipartFile);
+    request.fields['id_session'] = idSesion.toString();
 
     try {
+      final bytes = await image.readAsBytes();
+
+      var multipartFile = http.MultipartFile.fromBytes(
+        'file', 
+        bytes,
+        filename: image.name.isNotEmpty ? image.name : 'captura.jpg',
+        contentType: MediaType('image', 'jpeg'),
+      );
+
+      request.files.add(multipartFile);
+
       print("Enviando datos a Python...");
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+
       if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
         print("¡Éxito! Respuesta de Python: ${response.body}");
-        return response.body;
+        return AnalisisIAResponse.fromJson(data);
       } else {
-        print('Error al analizar imagen: ${response.statusCode}');
+        print('Error al analizar imagen: ${response.statusCode} - ${response.body}');
         return null;
       }
+      
     } catch (e) {
-      print('Error de conexión: $e');
+      print('Error al leer la imagen: $e');
       return null;
     }
     

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:front_winbin/services/AuthService.dart';
+import 'package:front_winbin/models/auth_models.dart';
+
+
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -12,11 +15,17 @@ class AuthProvider extends ChangeNotifier {
   String? _token;
   String? get token => _token;
 
-  String? _idperiodo;
-  String? get idperiodo => _idperiodo;
+  String? _nombrePeriodo;
+  String? get nombrePeriodo => _nombrePeriodo;
 
-  Map<String, dynamic>? _usuarioActual;
-  Map<String, dynamic>? get usuarioActual => _usuarioActual;
+  String? _idPeriodo;
+  String? get idPeriodo => _idPeriodo;
+
+  String? _idSesion;
+  String? get idSesion => _idSesion;
+
+  UsuarioPerfil? _usuarioActual;
+  UsuarioPerfil? get usuarioActual => _usuarioActual;
 
   static const String _keyToken = 'jwt_token';
 
@@ -24,28 +33,33 @@ class AuthProvider extends ChangeNotifier {
     _setCargando(true);
 
     try {
-      final response = await _authService.login(documento, contrasenna);
+      final LoginResponse? loginResponse = await _authService.login(documento, contrasenna);
 
-      if (response != null && response.containsKey('token')) {
-        _token = response['token'];
+      if (loginResponse != null && loginResponse.token.isNotEmpty) {
+        _token = loginResponse.token;
         await _storage.write(key: _keyToken, value: _token);
 
-        final periodoData = await cargarPeriodo();
+        final periodo  = await cargarPeriodo();
 
-        if (periodoData != null && periodoData.containsKey('id_periodo')) {
-          _idperiodo = periodoData['id_periodo'].toString();
-
-          await _authService.detallesSession(
+        if (periodo != null) {
+          _nombrePeriodo = periodo.nombrePeriodo;
+          _idPeriodo = periodo.idPeriodo;
+        }
+        
+        if (_idPeriodo != null && _token != null) {
+        final  sesionData = await _authService.detalleSession(
             documento: documento,
-            idPeriodo: _idperiodo!,
+            idPeriodo: _idPeriodo!,
             token: _token!,
           );
-        }
 
-        final perfil = await _authService.obtenerPerfil(token: _token!);
-        if (perfil != null) {
-          _usuarioActual = perfil;
+          if (sesionData != null && sesionData.idSesion != null) {
+            _idSesion = sesionData.idSesion.toString();
+
+            print("ID de sesión: $_idSesion");
+          }
         }
+        await obtenerPerfilUsuario();
 
         _setCargando(false);
         return true;
@@ -56,6 +70,29 @@ class AuthProvider extends ChangeNotifier {
       print("Error en el login: $e");
       _setCargando(false);
       return false;
+    }
+  }
+
+  Future<void> obtenerPerfilUsuario() async {
+    String? tokenActual = await obtenerToken();
+
+    if (tokenActual == null) {
+      print("No hay token disponible para recargar el perfil.");
+      return;
+    }
+
+    try {
+      final perfil = await _authService.obtenerPerfil(token: tokenActual);
+
+      if (perfil != null) {
+        _usuarioActual = perfil;  
+        notifyListeners();       
+        print("Perfil recargado exitosamente. Puntos actuales: ${_usuarioActual?.puntos}");
+      } else {
+        print("No se pudo obtener el perfil desde AuthService.");
+      }
+    } catch (e) {
+      print("Error al recargar el perfil del usuario: $e");
     }
   }
 
@@ -82,11 +119,11 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>> cargarCursos() async {
+  Future<List<Curso>?> cargarCursos() async {
     return await _authService.getCursos();
   }
 
-  Future<Map<String, dynamic>?> cargarPeriodo() async {
+  Future<Periodo?> cargarPeriodo() async {
     String? tokenActual = await obtenerToken();
 
     if (tokenActual == null) {
@@ -95,7 +132,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     final response = await _authService.getPeriodo(token: tokenActual);
-    if (response != null && response.containsKey('id_periodo')) {
+    if (response != null ) {
       return response;
     }
     return null;
@@ -110,7 +147,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _storage.delete(key: _keyToken);
     _token = null;
-    _idperiodo = null;
+    _nombrePeriodo = null;
     _usuarioActual = null;
 
     print("El usuario ha cerrado sesión");

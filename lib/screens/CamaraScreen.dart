@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
@@ -19,10 +18,15 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isCameraInitialized = false;
   bool _fotoProcesada = false;
 
-  void _mostrarSnackBar(String mensaje) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(mensaje)));
+  void _mostrarSnackBar(String mensaje, {Color backgroundColor = Colors.black87}) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Limpia la anterior para no solaparlas
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   Future<void> _encenderCamara() async {
@@ -42,11 +46,11 @@ class _CameraScreenState extends State<CameraScreen> {
             _isCameraInitialized = true;
           });
         } else {
-          _mostrarSnackBar('Error: La cámara no se pudo inicializar.');
+          _mostrarSnackBar('Error: La cámara no se pudo inicializar.', backgroundColor: Colors.red);
         }
       }
     } catch (e) {
-      _mostrarSnackBar("Error al abrir la cámara: $e");
+      _mostrarSnackBar("Error al abrir la cámara: $e", backgroundColor: Colors.red);
     }
   }
 
@@ -54,23 +58,61 @@ class _CameraScreenState extends State<CameraScreen> {
     if (_controller == null || !_controller!.value.isInitialized) return;
 
     if (_controller!.value.isTakingPicture) return;
+
     try {
+      final authProvider = context.read<AuthProvider>();
+      final iaProvider = context.read<IaProvider>();
+      final token = authProvider.token;
+      final idSesion = authProvider.idSesion;
+
+      if (token == null || token.isEmpty || idSesion == null) {
+        _mostrarSnackBar("Error: Sesión no válida o sin período activo.", backgroundColor: Colors.red);
+        return;
+      }
+
       XFile fotoXFile = await _controller!.takePicture();
-      File fotoFile = File(fotoXFile.path);
 
       if (mounted) {
-        _mostrarSnackBar("Foto capturada y enviada a la IA....");
+        _mostrarSnackBar("Foto capturada y enviada a la IA....", backgroundColor: Colors.blueGrey);
 
-        await context.read<IaProvider>().procesarReciclajeDeCamara(fotoFile);
+        bool exito = await iaProvider.procesarReciclajeDeCamara(
+          fotoCapturada: fotoXFile,
+          idSesion: idSesion,
+          token: token,
+        );
+        final resultado = iaProvider.resultadoIA;
 
-        _mostrarSnackBar("¡Imagen procesada con éxito!");
+        if (exito && resultado != null) {
+          String objeto = resultado.objetoDetectado;
+          num confianza = resultado.acertacionConfianza;
+          _mostrarSnackBar(
+            '¡Éxito! Detectado: $objeto ($confianza%)',
+            backgroundColor: Colors.green.shade700,
+          );
+          setState(() {
+            _fotoProcesada = true;
+          });
+          await authProvider.obtenerPerfilUsuario();
 
-        setState(() {
-          _fotoProcesada = true;
-        });
+        } else if (resultado != null &&
+            resultado.status == 'no_reciclable') {
+          String mensaje = resultado.msg ?? "No es reciclable";
+
+          _mostrarSnackBar(
+            mensaje,
+            backgroundColor: Colors.amber.shade900,
+          );
+        } else {
+          _mostrarSnackBar(
+            'Error al procesar la imagen',
+            backgroundColor: Colors.red.shade700,
+          );
+        }
+
+        
       }
     } catch (e) {
-      _mostrarSnackBar("Error al capturar la imagen: $e");
+      _mostrarSnackBar("Error al capturar la imagen: $e", backgroundColor: Colors.red);
     }
   }
 
@@ -102,14 +144,13 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final usuario = authProvider.usuarioActual;
-    final idPeriodo = authProvider.idperiodo ?? 'Sin período';
+    final periodo = authProvider.nombrePeriodo;
 
-
-    final String nombre = usuario?['nombre'] ?? 'Usuario';
-    final String avatarUrl = usuario?['avatarUrl'] ?? '';
-    final int puntos = usuario?['puntos'] ?? 0;
-    final String rol = usuario?['rol'] ?? 'USER';
-    final String nombreCurso = usuario?['curso']?['nombreCurso'] ?? 'Sin curso';
+    final String nombre = usuario?.nombre ?? 'Usuario';
+    final String avatarUrl = usuario?.avatarUrl ?? '';
+    final int puntos = usuario?.puntos ?? 0;
+    final String rol = usuario?.rol ?? 'USER';
+    final String nombreCurso = usuario?.curso?.nombre ?? 'Sin curso' ;
 
     return Scaffold(
       appBar: AppBar(
@@ -126,71 +167,89 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Column(
         children: [
           Container(
-          padding: const EdgeInsets.all(12.0),
-          color: Colors.teal.shade900,
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: Colors.teal.shade200,
-                backgroundImage: avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
-                child: avatarUrl.isEmpty
-                    ? const Icon(Icons.person, size: 28, color: Colors.white)
-                    : null,
-              ),
-              const SizedBox(width: 12),
+            padding: const EdgeInsets.all(12.0),
+            color: Colors.teal.shade900,
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.teal.shade200,
+                  backgroundImage: avatarUrl.isNotEmpty
+                      ? NetworkImage(avatarUrl)
+                      : null,
+                  child: avatarUrl.isEmpty
+                      ? const Icon(Icons.person, size: 28, color: Colors.white)
+                      : null,
+                ),
+                const SizedBox(width: 12),
 
-              
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '¡Hola, $nombre!',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '¡Hola, $nombre!',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Curso: $nombreCurso | Rol: $rol',
-                      style: TextStyle(color: Colors.teal.shade100, fontSize: 12),
-                    ),
-                    Text(
-                      'Período: $idPeriodo',
-                      style: TextStyle(color: Colors.teal.shade200, fontSize: 11),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        'Curso: $nombreCurso | Rol: $rol',
+                        style: TextStyle(
+                          color: Colors.teal.shade100,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        'Periodo: $periodo',
+                        style: TextStyle(
+                          color: Colors.teal.shade200,
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              // Puntos
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade700,
-                  borderRadius: BorderRadius.circular(12),
+                // Puntos
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade700,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Puntos',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$puntos',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Puntos',
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '$puntos',
-                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
           Expanded(
             child: Container(
               width: double.infinity,
@@ -234,21 +293,28 @@ class _CameraScreenState extends State<CameraScreen> {
                       ),
                     )
                   else if (!_fotoProcesada)
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber[800],
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                      onPressed: () => _capturarYProcesar(context),
-                      icon: const Icon(Icons.camera_alt, color: Colors.white),
-                      label: const Text(
-                        'Tomar Foto y Procesar',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    )
+                    Consumer<IaProvider>(
+                      builder: (context, iaProv, child) {
+                        return ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber[800],
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                          onPressed: iaProv.cargandoIA ? null : () => _capturarYProcesar(context),
+                          icon: iaProv.cargandoIA
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Icon(Icons.camera_alt, color: Colors.white),
+                          label: Text(
+                            iaProv.cargandoIA ? 'Procesando...' : 'Tomar Foto y Procesar',
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        );
+                      },
+                    )     
                   else
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(

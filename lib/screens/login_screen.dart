@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             )
                             :PixelButton(
                               label: 'INGRESAR',
-                              width: double.infinity,
+                              width: 150,
                               onPressed: _onLogin,
                             ),
                           ),

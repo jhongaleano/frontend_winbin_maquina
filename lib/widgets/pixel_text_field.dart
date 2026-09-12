@@ -11,6 +11,8 @@ class PixelTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.hint,
+    this.validator,
+    this.textInputAction,
   });
 
   final String label;
@@ -18,6 +20,8 @@ class PixelTextField extends StatelessWidget {
   final bool obscureText;
   final TextInputType keyboardType;
   final String? hint;
+  final String? Function(String?)? validator;
+  final TextInputAction? textInputAction;
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +30,12 @@ class PixelTextField extends StatelessWidget {
       children: [
         Text(label, style: AppTheme.pixelBody(size: 8, color: AppColors.oliveGreen)),
         const SizedBox(height: 8),
-        TextField(
+        TextFormField(
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          validator: validator,
           style: AppTheme.pixelBody(size: 9),
           decoration: InputDecoration(
             hintText: hint,
@@ -37,14 +43,23 @@ class PixelTextField extends StatelessWidget {
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.black, width: 3),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black, width: 3),
               borderRadius: BorderRadius.zero,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: AppColors.oliveGreen, width: 3),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.oliveGreen, width: 3),
               borderRadius: BorderRadius.zero,
             ),
+            errorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.redAccent, width: 3),
+              borderRadius: BorderRadius.zero,
+            ),
+            focusedErrorBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.redAccent, width: 3),
+              borderRadius: BorderRadius.zero,
+            ),
+            errorStyle: AppTheme.pixelBody(size: 7, color: Colors.redAccent),
           ),
         ),
       ],

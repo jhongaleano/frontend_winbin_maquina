@@ -1,11 +1,14 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:front_winbin/models/auth_models.dart';
+import 'package:front_winbin/models/session_models.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:8080/api';
+   final String baseUrl = dotenv.env['API_URL']!;
 
-  Future<Map<String, dynamic>?> login(String documento, String contrasenna) async {
+  Future<LoginResponse?> login(String documento, String contrasenna) async {
     final url = Uri.parse('$baseUrl/auth/login');
 
     try {
@@ -17,8 +20,8 @@ class AuthService {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print('Login exitoso: ${data}');
-        return data;
+        print('Login exitoso : ${response.statusCode}');
+        return LoginResponse.fromJson(data);
       } else {
         print('Error al iniciar sesión: ${response.statusCode}');
         return null;
@@ -29,7 +32,7 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>?> detalleSession({
+  Future<DetalleSessionResponse?> detalleSession({
   required String documento,
   required String idPeriodo,
   required String token,
@@ -44,18 +47,15 @@ class AuthService {
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
-          'documento': {
-            'documento': documento,
-          },
-          'id_periodo': {
-            'id_periodo': idPeriodo,
-          },
+          'documento': {'documento': documento},
+          'id_periodo': {'id_periodo': idPeriodo},
         }),
       );
 
-      if (response.statusCode == 200) {
-        print('Detalles del usuario obtenidos: ${jsonDecode(response.body)}');
-        return Map<String, dynamic>.from(jsonDecode(response.body));
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
+        return DetalleSessionResponse.fromJson(data);
       } else {
         print('Error al obtener detalles del usuario: ${response.statusCode}');
         return null;
@@ -66,26 +66,27 @@ class AuthService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getCursos() async {
+  Future<List<Curso>?> getCursos() async {
     final url = Uri.parse('$baseUrl/cursos');
 
     try {
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        print('cursos obtenidos : ${jsonDecode(response.body)}');
-        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        print('cursos obtenidos : ${response.statusCode}');
+        return jsonList.map((json) => Curso.fromJson(json)).toList();
       } else {
         print('Error al obtener cursos: ${response.statusCode}');
-        return [];
+        return null;
       }
     } catch (e) {
       print('Excepción al obtener cursos: $e');
-      return [];
+      return null;
     }
   }
 
-  Future<Map<String, dynamic>?> obtenerPerfil({required String token}) async {
+  Future<UsuarioPerfil?> obtenerPerfil({required String token}) async {
     final url = Uri.parse('$baseUrl/usuarios/perfil');
 
     try {
@@ -98,8 +99,8 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        print('perfiles obtenidos :${response.body}');
-        return Map<String, dynamic>.from(jsonDecode(response.body));
+        print('perfiles obtenidos : ${response.statusCode}');
+        return UsuarioPerfil.fromJson(jsonDecode(response.body));
       } else {
         print('Error al obtener perfil: ${response.statusCode}');
         return null;
@@ -111,7 +112,7 @@ class AuthService {
   }
 
 
-  Future<Map<String, dynamic>> getPeriodo({required String token}) async {
+  Future<Periodo?> getPeriodo({required String token}) async {
     final url = Uri.parse('$baseUrl/PeriodoRanking/activo');
 
     try {
@@ -124,15 +125,16 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        print('Periodo obtenido : ${jsonDecode(response.body)}');
-        return Map<String, dynamic>.from(jsonDecode(response.body));
+        final data = jsonDecode(response.body);
+        print('Periodo obtenido : ${response.statusCode}');
+        return Periodo.fromJson(data);
       } else {
         print('Error al obtener periodo: ${response.statusCode}');
-        return {};
+        return null;
       }
     } catch (e) {
-      print('Excepción al obtener cursos: $e');
-      return {};
+      print('Excepción al obtener periodo: $e');
+      return null;
     }
   }
 
@@ -169,42 +171,5 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>?> detallesSession({
-    required String documento,
-    required String idPeriodo,
-    required String token,
-    }) async {
-    final url = Uri.parse('$baseUrl/DetalleSession');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: 
-        {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token',
-        },
-
-        body: jsonEncode({
-          'documento': {
-            'documento': documento,
-          },
-          'id_periodo': {
-            'id_periodo': idPeriodo,
-          },
-        }),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Detalle de sesión creado con éxito');
-        return Map<String, dynamic>.from(jsonDecode(response.body));
-      } else {
-        print('Error en creación de detalle de sesión: ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      print('Error en creación de detalle de sesión: $e');
-      return null;
-    }
-  }
+  
 }

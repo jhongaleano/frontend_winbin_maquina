@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 class PixelTitleBox extends StatelessWidget {
-  const PixelTitleBox({
-    super.key,
-    required this.title,
-    this.subtitle,
-  });
+  const PixelTitleBox({super.key, required this.title, this.subtitle});
 
   final String title;
   final String? subtitle;
@@ -33,7 +29,7 @@ class PixelTitleBox extends StatelessWidget {
           Text(
             subtitle!,
             textAlign: TextAlign.center,
-            style: AppTheme.pixelSubtitle(size: 7),
+            style: AppTheme.pixelSubtitle(size: 10),
           ),
         ],
       ],

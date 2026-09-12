@@ -21,12 +21,12 @@ class FormContainer extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.9),
-        border: Border.all(color: Colors.black, width: 2),
+        color: Colors.white.withValues(alpha: 0.95),
+        border: Border.all(color: Colors.black, width: 3),
         boxShadow: const [
           BoxShadow(
             color: Colors.black26,
-            offset: Offset(3, 3),
+            offset: Offset(4, 4),
             blurRadius: 0,
           ),
         ],

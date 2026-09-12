@@ -40,7 +40,7 @@ class PixelButton extends StatelessWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: AppTheme.pixelBody(size: 10, color: textColor),
+          style: AppTheme.pixelBody(size: 12, color: textColor),
         ),
       ),
     );

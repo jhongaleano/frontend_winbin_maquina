@@ -55,8 +55,6 @@ class AuthProvider extends ChangeNotifier {
 
           if (sesionData != null && sesionData.idSesion != null) {
             _idSesion = sesionData.idSesion.toString();
-
-            print("ID de sesión: $_idSesion");
           }
         }
         await obtenerPerfilUsuario();
@@ -87,7 +85,7 @@ class AuthProvider extends ChangeNotifier {
       if (perfil != null) {
         _usuarioActual = perfil;  
         notifyListeners();       
-        print("Perfil recargado exitosamente. Puntos actuales: ${_usuarioActual?.puntos}");
+        print("Perfil recargado exitosamente.");
       } else {
         print("No se pudo obtener el perfil desde AuthService.");
       }

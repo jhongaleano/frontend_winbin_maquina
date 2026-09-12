@@ -2,10 +2,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:front_winbin/models/auth_models.dart';
 import 'package:front_winbin/models/session_models.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:8080/api';
+   final String baseUrl = dotenv.env['API_URL']!;
 
   Future<LoginResponse?> login(String documento, String contrasenna) async {
     final url = Uri.parse('$baseUrl/auth/login');
@@ -19,7 +20,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        print('Login exitoso: ${data}');
+        print('Login exitoso : ${response.statusCode}');
         return LoginResponse.fromJson(data);
       } else {
         print('Error al iniciar sesión: ${response.statusCode}');
@@ -53,7 +54,7 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        print('Detalle de sesión creado/obtenido con éxito: $data');
+        print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
         return DetalleSessionResponse.fromJson(data);
       } else {
         print('Error al obtener detalles del usuario: ${response.statusCode}');
@@ -73,7 +74,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
-        print('cursos obtenidos : $jsonList');
+        print('cursos obtenidos : ${response.statusCode}');
         return jsonList.map((json) => Curso.fromJson(json)).toList();
       } else {
         print('Error al obtener cursos: ${response.statusCode}');
@@ -98,7 +99,7 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        print('perfiles obtenidos :${response.body}');
+        print('perfiles obtenidos : ${response.statusCode}');
         return UsuarioPerfil.fromJson(jsonDecode(response.body));
       } else {
         print('Error al obtener perfil: ${response.statusCode}');
@@ -125,7 +126,7 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Periodo obtenido : $data');
+        print('Periodo obtenido : ${response.statusCode}');
         return Periodo.fromJson(data);
       } else {
         print('Error al obtener periodo: ${response.statusCode}');

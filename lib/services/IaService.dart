@@ -3,16 +3,17 @@ import 'package:http_parser/http_parser.dart';
 import 'package:cross_file/cross_file.dart';
 import 'dart:convert';
 import 'package:front_winbin/models/ia_models.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class IAservice {
 
-  static const String baseUrl = 'http://127.0.0.1:8000/api';
+  static final String baseUrl = dotenv.env['IA_URL']!;
   static Future<AnalisisIAResponse?> analizarImagen({
     required XFile image,
     required String idSesion,
     required String token,
   }) async {
-    final url = Uri.parse('$baseUrl/ia/analizar');
+    final url = Uri.parse('$baseUrl/ia-analisis');
     var request = http.MultipartRequest('POST', url);
 
     request.headers['Authorization'] = 'Bearer $token';
@@ -35,17 +36,18 @@ class IAservice {
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        print("¡Éxito! Respuesta de Python: ${response.body}");
+        final utf8Body = utf8.decode(response.bodyBytes);
+        final Map<String, dynamic> data = jsonDecode(utf8Body);
+        print("¡Éxito! Respuesta de Python: $utf8Body");
         return AnalisisIAResponse.fromJson(data);
       } else {
         print('Error al analizar imagen: ${response.statusCode} - ${response.body}');
         return null;
       }
-      
     } catch (e) {
-      print('Error al leer la imagen: $e');
+      print("ERROR CRÍTICO AL CONVERTIR EL JSON: $e");
       return null;
+      
     }
     
   }

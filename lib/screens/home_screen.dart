@@ -38,15 +38,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 900),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const PixelTitleBox(
                       title: 'Ingresa A Tu Reciclaje',
                       subtitle: 'TEJIENDO EXPERIENCIAS FUERA DEL AULA',
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
                     PixelButton(
                       label: 'INGRESAR',
-                      width: 220,
+                      width: 320,
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -56,10 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     PixelButton(
                       label: 'CREAR UNA CUENTA',
-                      width: 220,
+                      width: 320,
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       onPressed: () {
@@ -71,12 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 64),
                     Consumer<RankingProvider>(
                       builder: (context, rankingProvider, child) {
                         if (rankingProvider.cargandoRanking) {
                           return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
+                            padding: EdgeInsets.symmetric(vertical: 40),
                             child: CircularProgressIndicator(
                               color: AppColors.oliveGreen,
                             ),
@@ -97,43 +99,45 @@ class _HomeScreenState extends State<HomeScreen> {
                               )
                             : 0.0;
 
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: PixelInfoCard(
-                                tabLabel: "Usuario Top",
-                                title: topUsuario?.nombre ?? 'Cargando...',
-                                score: topUsuario != null
-                                    ? 'Score: ${topUsuario.puntos} pts'
-                                    : '---',
-                                progress: progresoUsuario,
-                                accentColor: AppColors.softPink,
-                                treeType: TreeType.pine,
+                        return IntrinsicHeight(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: PixelInfoCard(
+                                  tabLabel: "Usuario Top",
+                                  title: topUsuario?.nombre ?? 'Cargando...',
+                                  score: topUsuario != null
+                                      ? 'Score: ${topUsuario.puntos} pts'
+                                      : '---',
+                                  progress: progresoUsuario,
+                                  accentColor: AppColors.softPink,
+                                  treeType: TreeType.pine,
+                                  avatarUrl: topUsuario?.avatarUrl,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: PixelInfoCard(
-                                tabLabel: 'Curso Top',
-                                title: topCurso != null
-                                    ? 'Curso ${topCurso.nombre}'
-                                    : 'Cargando...',
-                                score: topCurso != null
-                                    ? 'Score: ${topCurso.puntosTotales} pts'
-                                    : '---',
-                                progress: progresoCurso,
-                                accentColor: AppColors.oliveGreen,
-                                treeType: TreeType.leafy,
+
+                              const SizedBox(width: 24),
+                              Expanded(
+                                child: PixelInfoCard(
+                                  tabLabel: 'Curso Top',
+                                  title: topCurso != null
+                                      ? 'Curso ${topCurso.nombre}'
+                                      : 'Cargando...',
+                                  score: topCurso != null
+                                      ? 'Score: ${topCurso.puntosTotales} pts'
+                                      : '---',
+                                  progress: progresoCurso,
+                                  accentColor: AppColors.oliveGreen,
+                                  treeType: TreeType.leafy,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
-
-                    const SizedBox(height: 120),
                   ],
                 ),
               ),

@@ -30,12 +30,12 @@ class IaProvider extends ChangeNotifier {
 
       if (respuesta != null) {
         _resultadoIA = respuesta;
-
-        if (respuesta.status == 'éxito') {
+        final String statusLimpio = respuesta.status.toLowerCase().trim();
+        if (statusLimpio == "exito"  || statusLimpio == "éxito") {
           print("¡Éxito! Objeto válido detectado y puntaje registrado en Spring Boot.");
           notifyListeners();
           return true; 
-        } else if (respuesta.status == 'no_reciclable') {
+        } else if (statusLimpio == "no_reciclable" ) {
           print("Atención: El objeto no es reciclable -> ${respuesta.status}");
           notifyListeners();
           return false; 

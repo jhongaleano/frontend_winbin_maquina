@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:front_winbin/models/auth_models.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RankingService {
-  static const String baseUrl = 'http://localhost:8080/api/ranking';
+  static final String baseUrl = dotenv.env['API_URL']!;
 
   Future<UsuarioPerfil?> getTopUsuario() async {
-    final url = Uri.parse('$baseUrl/top-usuario');
+    final url = Uri.parse('$baseUrl/ranking/top-usuario');
 
     try {
       final response = await http.get(

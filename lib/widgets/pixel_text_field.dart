@@ -28,38 +28,50 @@ class PixelTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTheme.pixelBody(size: 8, color: AppColors.oliveGreen)),
+        Text(
+          label,
+          style: AppTheme.pixelBody(size: 8, color: AppColors.oliveGreen),
+        ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          validator: validator,
-          style: AppTheme.pixelBody(size: 9),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: AppTheme.pixelBody(size: 8, color: AppColors.scoreGrey),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black, width: 3),
-              borderRadius: BorderRadius.zero,
+        SizedBox(
+          width: 350,
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            validator: validator,
+            style: AppTheme.pixelBody(size: 9),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTheme.pixelBody(
+                size: 8,
+                color: AppColors.scoreGrey,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.black, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.oliveGreen, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              errorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              focusedErrorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent, width: 3),
+                borderRadius: BorderRadius.zero,
+              ),
+              errorStyle: AppTheme.pixelBody(size: 7, color: Colors.redAccent),
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.oliveGreen, width: 3),
-              borderRadius: BorderRadius.zero,
-            ),
-            errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent, width: 3),
-              borderRadius: BorderRadius.zero,
-            ),
-            focusedErrorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.redAccent, width: 3),
-              borderRadius: BorderRadius.zero,
-            ),
-            errorStyle: AppTheme.pixelBody(size: 7, color: Colors.redAccent),
           ),
         ),
       ],

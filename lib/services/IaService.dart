@@ -4,6 +4,7 @@ import 'package:cross_file/cross_file.dart';
 import 'dart:convert';
 import 'package:front_winbin/models/ia_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:front_winbin/utils/api_exceptions.dart';
 
 class IAservice {
 
@@ -34,6 +35,10 @@ class IAservice {
       print("Enviando datos a Python...");
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
 
       if (response.statusCode == 200) {
         final utf8Body = utf8.decode(response.bodyBytes);

@@ -33,7 +33,7 @@ class RankingService {
 
 
   Future<Curso?> getTopCurso() async {
-    final url = Uri.parse('$baseUrl/top-curso');
+    final url = Uri.parse('$baseUrl/ranking/top-curso');
 
     try {
       final response = await http.get(

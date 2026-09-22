@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import '../services/IaService.dart';
 import '../models/ia_models.dart';
+import 'package:front_winbin/utils/api_exceptions.dart';
+
 
 class IaProvider extends ChangeNotifier {
   bool _cargandoIA = false;
   bool get cargandoIA => _cargandoIA;
-
- 
+  
   AnalisisIAResponse? _resultadoIA;
   AnalisisIAResponse? get resultadoIA => _resultadoIA;
+  
+
+
+
 
   Future<bool> procesarReciclajeDeCamara({
     required XFile fotoCapturada,
@@ -44,7 +49,8 @@ class IaProvider extends ChangeNotifier {
       print("Error: La respuesta de la IA vino nula o con formato no reconocido.");
       notifyListeners();
       return false;
-
+    }on UnauthorizedException {
+      rethrow;
     } catch (e) {
       print("Excepción en IaProvider: $e");
       _cargandoIA = false;

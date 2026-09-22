@@ -19,7 +19,7 @@ class RankingService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Ranking obtenido : $data');
+        print('Ranking obtenido');
         return UsuarioPerfil.fromJson(data);
       } else {
         print('Error al obtener ranking: ${response.statusCode}');
@@ -33,7 +33,7 @@ class RankingService {
 
 
   Future<Curso?> getTopCurso() async {
-    final url = Uri.parse('$baseUrl/top-curso');
+    final url = Uri.parse('$baseUrl/ranking/top-curso');
 
     try {
       final response = await http.get(
@@ -45,7 +45,7 @@ class RankingService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Curso ranking obtenido : $data');
+        print('Curso ranking obtenido ');
         return Curso.fromJson(data);
       } else {
         print('Error al obtener ranking: ${response.statusCode}');

@@ -8,7 +8,7 @@ import 'package:front_winbin/poviders/RankingProvider.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'screens/CamaraScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +34,20 @@ class MyApp extends StatelessWidget {
       title: 'WinBin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const HomeScreen(),
+      home: FutureBuilder(
+        future: context.read<AuthProvider>().checkLoginStatus(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final authProvider = context.read<AuthProvider>();
+          if (authProvider.isLoggedIn) {
+            return const CameraScreen();
+          } else {
+            return const HomeScreen();
+          }
+        },
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:front_winbin/poviders/IaProvider.dart';
 import 'package:front_winbin/poviders/AuthProvider.dart';
 import 'package:front_winbin/screens/home_screen.dart';
+import 'package:front_winbin/utils/api_exceptions.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -61,6 +62,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     try {
       final authProvider = context.read<AuthProvider>();
+
       final iaProvider = context.read<IaProvider>();
       final token = authProvider.token;
       final idSesion = authProvider.idSesion;
@@ -75,11 +77,29 @@ class _CameraScreenState extends State<CameraScreen> {
       if (mounted) {
         _mostrarSnackBar("Foto capturada y enviada a la IA....", backgroundColor: Colors.blueGrey);
 
-        bool exito = await iaProvider.procesarReciclajeDeCamara(
+        bool exito = false;
+        
+
+        try {
+          exito = await iaProvider.procesarReciclajeDeCamara(
           fotoCapturada: fotoXFile,
           idSesion: idSesion,
           token: token,
         );
+       
+        } on UnauthorizedException {
+          await authProvider.logout();
+          if (mounted) {
+            _mostrarSnackBar("Tu sesión ha expirado. Por favor ingresa de nuevo.", backgroundColor: Colors.red);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute<void>(builder: (_) => const HomeScreen()), 
+              (route) => false,
+            );
+          }
+          return;
+        }
+
         final resultado = iaProvider.resultadoIA;
 
         if (exito && resultado != null) {
@@ -145,7 +165,6 @@ class _CameraScreenState extends State<CameraScreen> {
     final authProvider = context.watch<AuthProvider>();
     final usuario = authProvider.usuarioActual;
     final periodo = authProvider.nombrePeriodo;
-
     final String nombre = usuario?.nombre ?? 'Usuario';
     final String avatarUrl = usuario?.avatarUrl ?? '';
     final int puntos = usuario?.puntos ?? 0;

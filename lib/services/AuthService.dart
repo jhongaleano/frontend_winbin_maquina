@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:front_winbin/models/auth_models.dart';
 import 'package:front_winbin/models/session_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:front_winbin/utils/api_exceptions.dart';
 
 
 class AuthService {
@@ -52,6 +53,10 @@ class AuthService {
         }),
       );
 
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
@@ -98,6 +103,10 @@ class AuthService {
       }
       );
 
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
+
       if (response.statusCode == 200) {
         print('perfiles obtenidos : ${response.statusCode}');
         return UsuarioPerfil.fromJson(jsonDecode(response.body));
@@ -123,6 +132,10 @@ class AuthService {
         'Authorization': 'Bearer $token',
       },
       );
+
+      if (response.statusCode == 401) {
+        throw UnauthorizedException();
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

@@ -11,6 +11,7 @@ import '../widgets/pixel_tree_icon.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,10 +22,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
+
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RankingProvider>().cargarLeaderboard();
+        context.read<RankingProvider>().conectarWebsocket( ); 
     });
+  }
+
+  @override
+  void dispose() {
+    context.read<RankingProvider>().desconectar();
+    super.dispose();
   }
 
   @override

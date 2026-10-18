@@ -11,7 +11,6 @@ import '../widgets/pixel_tree_icon.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,10 +21,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<RankingProvider>().conectarWebsocket( ); 
+      context.read<RankingProvider>().conectarWebsocket();
     });
   }
 
@@ -58,12 +56,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'INGRESAR',
                       width: 320,
                       onPressed: () {
+                        context.read<RankingProvider>().desconectar();
                         Navigator.push(
                           context,
                           MaterialPageRoute<void>(
                             builder: (_) => const LoginScreen(),
                           ),
-                        );
+                        ).then((_) {
+                          if (context.mounted) {
+                            context.read<RankingProvider>().conectarWebsocket();
+                          }
+                        });
                       },
                     ),
                     const SizedBox(height: 20),
@@ -73,12 +76,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       onPressed: () {
+                        context.read<RankingProvider>().desconectar();
                         Navigator.push(
                           context,
                           MaterialPageRoute<void>(
                             builder: (_) => const RegisterScreen(),
                           ),
-                        );
+                        ).then((_) {
+                          if (context.mounted) {
+                            context.read<RankingProvider>().conectarWebsocket();
+                          }
+                        });
                       },
                     ),
                     const SizedBox(height: 64),

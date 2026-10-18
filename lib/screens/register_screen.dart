@@ -26,6 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmarContrasennaController = TextEditingController();
   final _documentoController = TextEditingController();
 
+  bool _ocultarContrasenna = true;
+  bool _ocultarConfirmarContrasenna = true;
+
   List<Curso> _cursos = [];
   int? _cursoSeleccionadoId;
 
@@ -155,6 +158,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),
                 child: Form(
+                  key: _formKey,
+                  
                   child: Column(
                     children: [
                       FormContainer(
@@ -183,8 +188,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty)
                                 return 'Requerido';
-                              if (value.trim().length < 4)
-                                return 'Mínimo 4 dígitos';
+                              if (value.trim().length < 4 || value.trim().length > 10)
+                                return 'Mínimo 4 dígitos y máximo 10';
                               if (!RegExp(r'^[0-9]+$').hasMatch(value.trim())) {
                                 return 'Solo números sin espacios';
                               }
@@ -264,8 +269,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Contrasena',
                             controller: _contrasennaController,
                             hint: '********',
-                            obscureText: true,
+                            obscureText: _ocultarContrasenna,
                             textInputAction: TextInputAction.next,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _ocultarContrasenna ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _ocultarContrasenna = !_ocultarContrasenna;
+                                });
+                              },
+                            ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty)
                                 return 'Requerido';
@@ -279,8 +296,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Confirmar Contrasena',
                             controller: _confirmarContrasennaController,
                             hint: '********',
-                            obscureText: true,
+                            obscureText: _ocultarConfirmarContrasenna,
                             textInputAction: TextInputAction.done,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _ocultarConfirmarContrasenna ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _ocultarConfirmarContrasenna = !_ocultarConfirmarContrasenna;
+                                });
+                              },
+                            ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty)
                                 return 'Requerido';

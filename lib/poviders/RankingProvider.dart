@@ -38,6 +38,12 @@ class RankingProvider with ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    desconectar();
+    super.dispose();
+  }
+
   void conectarWebsocket() {
     if (_isConnected) return;
 

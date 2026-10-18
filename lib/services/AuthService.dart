@@ -5,9 +5,8 @@ import 'package:front_winbin/models/session_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:front_winbin/utils/api_exceptions.dart';
 
-
 class AuthService {
-   final String baseUrl = dotenv.env['API_URL']!;
+  final String baseUrl = dotenv.env['API_URL']!;
 
   Future<LoginResponse?> login(String documento, String contrasenna) async {
     final url = Uri.parse('$baseUrl/auth/login');
@@ -34,10 +33,10 @@ class AuthService {
   }
 
   Future<DetalleSessionResponse?> detalleSession({
-  required String documento,
-  required String idPeriodo,
-  required String token,
- } ) async {
+    required String documento,
+    required String idPeriodo,
+    required String token,
+  }) async {
     final url = Uri.parse('$baseUrl/DetalleSession');
 
     try {
@@ -59,7 +58,9 @@ class AuthService {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        print('Detalle de sesión creado/obtenido con éxito: ${response.statusCode}');
+        print(
+          'Detalle de sesión creado/obtenido con éxito: ${response.statusCode}',
+        );
         return DetalleSessionResponse.fromJson(data);
       } else {
         print('Error al obtener detalles del usuario: ${response.statusCode}');
@@ -96,11 +97,11 @@ class AuthService {
 
     try {
       final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      }
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 401) {
@@ -120,17 +121,16 @@ class AuthService {
     }
   }
 
-
   Future<Periodo?> getPeriodo({required String token}) async {
     final url = Uri.parse('$baseUrl/PeriodoRanking/activo');
 
     try {
       final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 401) {
@@ -166,7 +166,7 @@ class AuthService {
         body: jsonEncode({
           'documento': documento,
           'nombre': nombre,
-          'curso': {'id_curso': cursoId},
+          'id_curso': cursoId,
           'contrasenna': contrasenna,
         }),
       );
@@ -175,6 +175,8 @@ class AuthService {
         print('Usuario registrado con éxito');
         return true;
       } else {
+        print('Error del servidor. Status: ${response.statusCode}');
+        print('Cuerpo de la respuesta: ${response.body}');
         print('Error en registro: ${response.statusCode}');
         return false;
       }
@@ -183,6 +185,4 @@ class AuthService {
       return false;
     }
   }
-
-  
 }

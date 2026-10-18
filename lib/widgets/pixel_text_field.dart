@@ -13,6 +13,7 @@ class PixelTextField extends StatelessWidget {
     this.hint,
     this.validator,
     this.textInputAction,
+    this.suffixIcon,
   });
 
   final String label;
@@ -22,6 +23,7 @@ class PixelTextField extends StatelessWidget {
   final String? hint;
   final String? Function(String?)? validator;
   final TextInputAction? textInputAction;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,7 @@ class PixelTextField extends StatelessWidget {
             style: AppTheme.pixelBody(size: 9),
             decoration: InputDecoration(
               hintText: hint,
+              suffixIcon: suffixIcon,
               hintStyle: AppTheme.pixelBody(
                 size: 8,
                 color: AppColors.scoreGrey,

@@ -124,6 +124,7 @@ class AuthProvider extends ChangeNotifier {
       _setCargando(false);
       return exito;
     } catch (e) {
+      print("Error al intentar registrar en el backend: $e");
       _setCargando(false);
       return false;
     }

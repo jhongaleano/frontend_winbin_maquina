@@ -4,7 +4,7 @@ import 'package:front_winbin/models/auth_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RankingService {
-  static final String baseUrl = dotenv.env['API_URL']!;
+  static final String baseUrl = dotenv.env['API_URL'];
 
   Future<UsuarioPerfil?> getTopUsuario() async {
     final url = Uri.parse('$baseUrl/ranking/top-usuario');

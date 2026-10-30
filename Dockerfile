@@ -1,12 +1,14 @@
 
 FROM ghcr.io/cirruslabs/flutter:stable AS build
 
-WORKDIR /app
-COPY . .
 
 ARG API_URL
 ARG IA_URL
 ARG WS_URL
+
+WORKDIR /app
+COPY . .
+
 
 
 RUN flutter pub get

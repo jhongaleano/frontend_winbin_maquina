@@ -49,7 +49,9 @@ class RankingProvider with ChangeNotifier {
 
     cargarLeaderboard();
 
-    final String socketUrl = dotenv.env['WS_URL'] ?? '';
+    final String socketUrl = String.fromEnvironment(
+    'WS_URL', 
+  );
     print("URL DEL WEBSOCKET CARGADA: $socketUrl");
 
     _stompClient = StompClient(

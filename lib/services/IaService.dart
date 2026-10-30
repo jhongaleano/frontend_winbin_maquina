@@ -3,12 +3,13 @@ import 'package:http_parser/http_parser.dart';
 import 'package:cross_file/cross_file.dart';
 import 'dart:convert';
 import 'package:front_winbin/models/ia_models.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:front_winbin/utils/api_exceptions.dart';
 
 class IAservice {
 
-  static final String? baseUrl = dotenv.env['IA_URL'];
+  static final String baseUrl = String.fromEnvironment(
+    'IA_URL', 
+  );
   static Future<AnalisisIAResponse?> analizarImagen({
     required XFile image,
     required String idSesion,

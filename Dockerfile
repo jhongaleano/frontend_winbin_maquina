@@ -4,8 +4,16 @@ FROM ghcr.io/cirruslabs/flutter:stable AS build
 WORKDIR /app
 COPY . .
 
+ARG API_URL
+ARG IA_URL
+ARG WS_URL
+
+
 RUN flutter pub get
-RUN flutter build web --release
+RUN flutter build web --release \
+                    --dart-define=API_URL=${API_URL} \
+                    --dart-define=IA_URL=${IA_URL} \
+                    --dart-define=WS_URL=${WS_URL} 
 
 
 FROM nginx:alpine

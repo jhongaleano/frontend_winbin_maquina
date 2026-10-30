@@ -8,7 +8,7 @@ import 'package:front_winbin/utils/api_exceptions.dart';
 
 class IAservice {
 
-  static final String baseUrl = dotenv.maybeGet('IA_URL') ?? '';
+  static final String baseUrl = dotenv.env['IA_URL']!;
   static Future<AnalisisIAResponse?> analizarImagen({
     required XFile image,
     required String idSesion,

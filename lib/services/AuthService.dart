@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:front_winbin/utils/api_exceptions.dart';
 
 class AuthService {
-  final String baseUrl = dotenv.env['API_URL']!;
+  final String? baseUrl = dotenv.env['API_URL'];
 
   Future<LoginResponse?> login(String documento, String contrasenna) async {
     final url = Uri.parse('$baseUrl/auth/login');

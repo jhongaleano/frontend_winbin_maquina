@@ -28367,7 +28367,7 @@ case 3:case 4:case 5:return A.d8(null,t.H)}},
 AQ(a,b,c){return A.aSu(a,b,c)},
 aSu(a3,a4,a5){var s=0,r=A.C(t.wf),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
 var $async$AQ=A.y(function(a6,a7){if(a6===1){o.push(a7)
-s=p}for(;;)switch(s){case 0:a1=A.aTn("POST",A.dC($.aMy()+"/ia-analisis",0,null))
+s=p}for(;;)switch(s){case 0:a1=A.aTn("POST",A.dC(A.k($.aMy())+"/ia-analisis",0,null))
 a1.r.m(0,"Authorization","Bearer "+a5)
 a1.x.m(0,"id_session",a3)
 p=4
@@ -90129,9 +90129,7 @@ case 1:return A.z(p.at(-1),r)}})
 return A.B($async$B3,r)}}
 A.agI.prototype={}
 A.aAA.prototype={
-$1(a){var s=$.Kb().gAJ().h(0,"API_URL")
-s.toString
-return new A.pd(new A.a3j(s),$.aA())},
+$1(a){return new A.pd(new A.a3j($.Kb().gAJ().h(0,"API_URL")),$.aA())},
 $S:548}
 A.aAB.prototype={
 $1(a){return new A.lw($.aA())},
@@ -91055,7 +91053,7 @@ A.a3j.prototype={
 By(a,b){return this.asX(a,b)},
 asX(a,b){var s=0,r=A.C(t.tv),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e
 var $async$By=A.y(function(c,d){if(c===1){o.push(d)
-s=p}for(;;)switch(s){case 0:f=A.dC(n.a+"/auth/login",0,null)
+s=p}for(;;)switch(s){case 0:f=A.dC(A.k(n.a)+"/auth/login",0,null)
 p=4
 j=t.N
 i=A.ab(["Content-Type","application/json"],j,j)
@@ -91095,7 +91093,7 @@ return A.B($async$By,r)},
 Ar(a,b,c){return this.apj(a,b,c)},
 apj(a,b,a0){var s=0,r=A.C(t.MC),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e,d,c
 var $async$Ar=A.y(function(a1,a2){if(a1===1){o.push(a2)
-s=p}for(;;)switch(s){case 0:d=A.dC(n.a+"/DetalleSession",0,null)
+s=p}for(;;)switch(s){case 0:d=A.dC(A.k(n.a)+"/DetalleSession",0,null)
 p=4
 j=t.N
 i=A.ab(["Content-Type","application/json","Authorization","Bearer "+a0],j,j)
@@ -91139,7 +91137,7 @@ case 2:return A.z(o.at(-1),r)}})
 return A.B($async$Ar,r)},
 wF(){var s=0,r=A.C(t.r2),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$wF=A.y(function(a,b){if(a===1){o.push(b)
-s=p}for(;;)switch(s){case 0:h=A.dC(n.a+"/cursos",0,null)
+s=p}for(;;)switch(s){case 0:h=A.dC(A.k(n.a)+"/cursos",0,null)
 p=4
 s=7
 return A.r(A.a2k(h,null),$async$wF)
@@ -91174,7 +91172,7 @@ return A.B($async$wF,r)},
 BD(a){return this.atu(a)},
 atu(a){var s=0,r=A.C(t.rX),q,p=2,o=[],n=this,m,l,k,j,i,h
 var $async$BD=A.y(function(b,c){if(b===1){o.push(c)
-s=p}for(;;)switch(s){case 0:i=A.dC(n.a+"/usuarios/perfil",0,null)
+s=p}for(;;)switch(s){case 0:i=A.dC(A.k(n.a)+"/usuarios/perfil",0,null)
 p=4
 k=t.N
 s=7
@@ -91209,7 +91207,7 @@ return A.B($async$BD,r)},
 wK(a){return this.a0P(a)},
 a0P(a){var s=0,r=A.C(t.sD),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$wK=A.y(function(b,c){if(b===1){o.push(c)
-s=p}for(;;)switch(s){case 0:h=A.dC(n.a+"/PeriodoRanking/activo",0,null)
+s=p}for(;;)switch(s){case 0:h=A.dC(A.k(n.a)+"/PeriodoRanking/activo",0,null)
 p=4
 j=t.N
 s=7
@@ -91245,7 +91243,7 @@ return A.B($async$wK,r)},
 Ck(a,b,c,d){return this.ava(a,b,c,d)},
 ava(a,b,c,d){var s=0,r=A.C(t.y),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$Ck=A.y(function(e,f){if(e===1){o.push(f)
-s=p}for(;;)switch(s){case 0:h=A.dC(n.a+"/usuarios/registro",0,null)
+s=p}for(;;)switch(s){case 0:h=A.dC(A.k(n.a)+"/usuarios/registro",0,null)
 p=4
 k=t.N
 j=A.ab(["Content-Type","application/json; charset=UTF-8"],k,k)
@@ -91284,7 +91282,7 @@ $S:564}
 A.ah7.prototype={
 wO(){var s=0,r=A.C(t.rX),q,p=2,o=[],n,m,l,k,j,i,h
 var $async$wO=A.y(function(a,b){if(a===1){o.push(b)
-s=p}for(;;)switch(s){case 0:i=A.dC($.aEx()+"/ranking/top-usuario",0,null)
+s=p}for(;;)switch(s){case 0:i=A.dC(A.k($.aEx())+"/ranking/top-usuario",0,null)
 p=4
 k=t.N
 s=7
@@ -91318,7 +91316,7 @@ case 2:return A.z(o.at(-1),r)}})
 return A.B($async$wO,r)},
 wN(){var s=0,r=A.C(t.hl),q,p=2,o=[],n,m,l,k,j,i,h
 var $async$wN=A.y(function(a,b){if(a===1){o.push(b)
-s=p}for(;;)switch(s){case 0:i=A.dC($.aEx()+"/ranking/top-curso",0,null)
+s=p}for(;;)switch(s){case 0:i=A.dC(A.k($.aEx())+"/ranking/top-curso",0,null)
 p=4
 k=t.N
 s=7
@@ -101148,12 +101146,8 @@ r($,"aS6","a2t",()=>{var q=new A.aeY()
 q.a6k($.aEs())
 return q})
 s($,"b6E","aPa",()=>new A.agI(A.o(t.N,A.ay("am<cQ?>?(cQ?)"))))
-s($,"b28","aMy",()=>{var q=$.Kb().gAJ().h(0,"IA_URL")
-q.toString
-return q})
-s($,"b3k","aEx",()=>{var q=$.Kb().gAJ().h(0,"API_URL")
-q.toString
-return q})
+s($,"b28","aMy",()=>$.Kb().gAJ().h(0,"IA_URL"))
+s($,"b3k","aEx",()=>$.Kb().gAJ().h(0,"API_URL"))
 s($,"b24","aMx",()=>new A.a5s())
 r($,"b6k","aP3",()=>A.aQu())
 s($,"b50","aOg",()=>A.ab([B.h7,"Thin",B.oA,"ExtraLight",B.oB,"Light",B.n,"Regular",B.a2,"Medium",B.oC,"SemiBold",B.bK,"Bold",B.oD,"ExtraBold",B.ks,"Black"],A.ay("eV"),t.N))

@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:front_winbin/models/auth_models.dart';
-import '../services/RankingService.dart'; 
+import '../services/RankingService.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class RankingProvider with ChangeNotifier {
   StompClient? _stompClient;
   bool _isConnected = false;
+  bool _disposed = false;
   final RankingService _rankingService = RankingService();
 
   UsuarioPerfil? _topUsuario;
   UsuarioPerfil? get topUsuario => _topUsuario;
-  
+
   Curso? _topCurso;
   Curso? get topCurso => _topCurso;
 
@@ -20,47 +21,38 @@ class RankingProvider with ChangeNotifier {
   bool get cargandoRanking => _cargandoRanking;
   bool get isConnected => _isConnected;
 
+  void _notificar() {
+    if (!_disposed) notifyListeners();
+  }
+
   Future<void> cargarLeaderboard() async {
     _cargandoRanking = true;
-    notifyListeners();
-
+    _notificar();
     try {
-      
       _topUsuario = await _rankingService.getTopUsuario();
       _topCurso = await _rankingService.getTopCurso();
-
-      
     } catch (e) {
       print("Error detallado en RankingProvider: $e");
     } finally {
       _cargandoRanking = false;
-      notifyListeners();
+      _notificar();
     }
   }
 
-  @override
-  void dispose() {
-    desconectar();
-    super.dispose();
-  }
-
   void conectarWebsocket() {
-    if (_isConnected) return;
+    if (_stompClient != null) return;
 
     cargarLeaderboard();
 
-    final String socketUrl = String.fromEnvironment(
-    'WS_URL', 
-  );
-    print("URL DEL WEBSOCKET CARGADA: $socketUrl");
+
+    final String socketUrl = dotenv.env['WS_URL'] ?? '';
 
     _stompClient = StompClient(
       config: StompConfig(
         url: socketUrl,
         onConnect: (StompFrame frame) {
           _isConnected = true;
-          print("¡CONEXIÓN WEBSOCKET EXITOSA!");
-          notifyListeners();
+          _notificar();
 
           _stompClient?.subscribe(
             destination: '/topic/ranking/estudiante-top',
@@ -68,7 +60,7 @@ class RankingProvider with ChangeNotifier {
               if (frame.body != null) {
                 final Map<String, dynamic> data = json.decode(frame.body!);
                 _topUsuario = UsuarioPerfil.fromJson(data);
-                notifyListeners();
+                _notificar();
               }
             },
           );
@@ -79,25 +71,34 @@ class RankingProvider with ChangeNotifier {
               if (frame.body != null) {
                 final Map<String, dynamic> data = json.decode(frame.body!);
                 _topCurso = Curso.fromJson(data);
-                notifyListeners(); 
+                _notificar();
               }
             },
           );
         },
-        onWebSocketError: (dynamic error) => print('Error en el WebSocket: $error'),
-        onStompError: (StompFrame frame) => print('Error del Protocolo STOMP: ${frame.body}'), 
-        onDisconnect: (StompFrame frame) => print('Desconectado del WebSocket'), 
+        onWebSocketError: (dynamic error) =>
+            debugPrint('Error en el WebSocket: $error'),
+        onStompError: (StompFrame frame) =>
+            debugPrint('Error del Protocolo STOMP: ${frame.body}'),
+        onDisconnect: (StompFrame frame) =>
+            debugPrint('Desconectado del WebSocket'),
       ),
     );
 
     _stompClient?.activate();
   }
 
-  void desconectar() {
+  void desconectar({bool notificar = true}) {
     _stompClient?.deactivate();
+    _stompClient = null;
     _isConnected = false;
-    notifyListeners();
+    if (notificar) _notificar();
   }
 
-  
+  @override
+  void dispose() {
+    _disposed = true;
+    desconectar(notificar: false);
+    super.dispose();
+  }
 }

@@ -19,17 +19,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final RankingProvider _rankingProvider;
   @override
   void initState() {
     super.initState();
+    _rankingProvider = context.read<RankingProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RankingProvider>().conectarWebsocket();
+      if (mounted) _rankingProvider.conectarWebsocket();
     });
   }
 
   @override
   void dispose() {
-    context.read<RankingProvider>().desconectar();
+    _rankingProvider.desconectar(notificar: false);
     super.dispose();
   }
 
@@ -56,16 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'INGRESAR',
                       width: 320,
                       onPressed: () {
-                        context.read<RankingProvider>().desconectar();
+                        _rankingProvider.desconectar();
                         Navigator.push(
                           context,
                           MaterialPageRoute<void>(
                             builder: (_) => const LoginScreen(),
                           ),
                         ).then((_) {
-                          if (context.mounted) {
-                            context.read<RankingProvider>().conectarWebsocket();
-                          }
+                          if (mounted) _rankingProvider.conectarWebsocket();
                         });
                       },
                     ),
@@ -76,16 +76,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       onPressed: () {
-                        context.read<RankingProvider>().desconectar();
+                        _rankingProvider.desconectar(notificar: false);
                         Navigator.push(
                           context,
                           MaterialPageRoute<void>(
                             builder: (_) => const RegisterScreen(),
                           ),
                         ).then((_) {
-                          if (context.mounted) {
-                            context.read<RankingProvider>().conectarWebsocket();
-                          }
+                          if (mounted) _rankingProvider.conectarWebsocket();
                         });
                       },
                     ),

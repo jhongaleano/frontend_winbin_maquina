@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _contrasennaController = TextEditingController();
 
   bool _isLoading = false;
+  bool _ocultarPassword = true;
   @override
   void dispose() {
     _documentoController.dispose();
@@ -122,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           PixelTextField(
                             label: 'Documento',
-                        
+
                             controller: _documentoController,
                             hint: 'Tu documento de identidad',
                             keyboardType: TextInputType.number,
@@ -143,8 +144,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           PixelTextField(
                             label: 'Contrasena',
                             controller: _contrasennaController,
-                            obscureText: true,
+                            obscureText: _ocultarPassword,
                             hint: '********',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _ocultarPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _ocultarPassword = !_ocultarPassword;
+                                });
+                              },
+                            ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Por favor ingresa tu contraseña';
@@ -158,30 +171,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 24),
                           SizedBox(
                             height: 50,
-                            child: _isLoading 
-                            ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.green,
-                              ),
-                            )
-                            :PixelButton(
-                              label: 'INGRESAR',
-                              width: 150,
-                              onPressed: _onLogin,
-                            ),
+                            child: _isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.green,
+                                    ),
+                                  )
+                                : PixelButton(
+                                    label: 'INGRESAR',
+                                    width: 150,
+                                    onPressed: _onLogin,
+                                  ),
                           ),
                           const SizedBox(height: 16),
                           GestureDetector(
-                            onTap: _isLoading 
-                            ? null 
-                            : () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (_) => const RegisterScreen(),
-                                ),
-                              );
-                            },
+                            onTap: _isLoading
+                                ? null
+                                : () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => const RegisterScreen(),
+                                      ),
+                                    );
+                                  },
                             child: Text(
                               'No tienes cuenta? Crear una',
                               textAlign: TextAlign.center,

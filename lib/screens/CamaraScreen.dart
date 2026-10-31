@@ -19,8 +19,13 @@ class _CameraScreenState extends State<CameraScreen> {
   bool _isCameraInitialized = false;
   bool _fotoProcesada = false;
 
-  void _mostrarSnackBar(String mensaje, {Color backgroundColor = Colors.black87}) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Limpia la anterior para no solaparlas
+  void _mostrarSnackBar(
+    String mensaje, {
+    Color backgroundColor = Colors.black87,
+  }) {
+    ScaffoldMessenger.of(
+      context,
+    ).hideCurrentSnackBar(); // Limpia la anterior para no solaparlas
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(mensaje),
@@ -35,23 +40,49 @@ class _CameraScreenState extends State<CameraScreen> {
       _cameras = await availableCameras();
 
       if (_cameras != null && _cameras!.isNotEmpty) {
-        _controller = CameraController(
+        final controller = CameraController(
           _cameras!.first,
           ResolutionPreset.medium,
           enableAudio: false,
         );
-        await _controller!.initialize();
+        await controller.initialize();
 
-        if (mounted) {
-          setState(() {
-            _isCameraInitialized = true;
-          });
-        } else {
-          _mostrarSnackBar('Error: La cámara no se pudo inicializar.', backgroundColor: Colors.red);
+        if (!mounted) {
+          await controller.dispose();
+          return;
         }
+
+        setState(() {
+          _controller = controller;
+          _isCameraInitialized = true;
+        });
+      } else {
+        _mostrarSnackBar("No se encontró cámara", backgroundColor: Colors.red);
       }
     } catch (e) {
-      _mostrarSnackBar("Error al abrir la cámara: $e", backgroundColor: Colors.red);
+      if (mounted) {
+        _mostrarSnackBar("Error al abrir la cámara: $e",
+            backgroundColor: Colors.red);
+      }
+    }
+  }
+
+  Future<void> _apagarCamara() async {
+    final controller = _controller;
+    if (mounted) {
+      setState(() {
+        _isCameraInitialized = false;
+        _fotoProcesada = false;
+        _controller = null;
+      });
+    } else {
+      _controller = null;
+      _isCameraInitialized = false;
+    }
+    try {
+      await controller?.dispose();
+    } catch (e) {
+      debugPrint('Error al liberar la cámara: $e');
     }
   }
 
@@ -68,32 +99,41 @@ class _CameraScreenState extends State<CameraScreen> {
       final idSesion = authProvider.idSesion;
 
       if (token == null || token.isEmpty || idSesion == null) {
-        _mostrarSnackBar("Error: Sesión no válida o sin período activo.", backgroundColor: Colors.red);
+        _mostrarSnackBar(
+          "Error: Sesión no válida o sin período activo.",
+          backgroundColor: Colors.red,
+        );
         return;
       }
 
       XFile fotoXFile = await _controller!.takePicture();
+      if (!mounted) return;
 
       if (mounted) {
-        _mostrarSnackBar("Foto capturada y enviada a la IA....", backgroundColor: Colors.blueGrey);
+        _mostrarSnackBar(
+          "Foto capturada y enviada a la IA....",
+          backgroundColor: Colors.blueGrey,
+        );
 
         bool exito = false;
-        
 
         try {
           exito = await iaProvider.procesarReciclajeDeCamara(
-          fotoCapturada: fotoXFile,
-          idSesion: idSesion,
-          token: token,
-        );
-       
+            fotoCapturada: fotoXFile,
+            idSesion: idSesion,
+            token: token,
+          );
         } on UnauthorizedException {
+          await _apagarCamara();
           await authProvider.logout();
           if (mounted) {
-            _mostrarSnackBar("Tu sesión ha expirado. Por favor ingresa de nuevo.", backgroundColor: Colors.red);
+            _mostrarSnackBar(
+              "Tu sesión ha expirado. Por favor ingresa de nuevo.",
+              backgroundColor: Colors.red,
+            );
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute<void>(builder: (_) => const HomeScreen()), 
+              MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
               (route) => false,
             );
           }
@@ -101,6 +141,7 @@ class _CameraScreenState extends State<CameraScreen> {
         }
 
         final resultado = iaProvider.resultadoIA;
+        if (!mounted) return;
 
         if (exito && resultado != null) {
           String objeto = resultado.objetoDetectado;
@@ -113,26 +154,22 @@ class _CameraScreenState extends State<CameraScreen> {
             _fotoProcesada = true;
           });
           await authProvider.obtenerPerfilUsuario();
-
-        } else if (resultado != null &&
-            resultado.status == 'no_reciclable') {
+        } else if (resultado != null && resultado.status == 'no_reciclable') {
           String mensaje = resultado.msg ?? "No es reciclable";
 
-          _mostrarSnackBar(
-            mensaje,
-            backgroundColor: Colors.amber.shade900,
-          );
+          _mostrarSnackBar(mensaje, backgroundColor: Colors.amber.shade900);
         } else {
           _mostrarSnackBar(
             'Error al procesar la imagen',
             backgroundColor: Colors.red.shade700,
           );
         }
-
-        
       }
     } catch (e) {
-      _mostrarSnackBar("Error al capturar la imagen: $e", backgroundColor: Colors.red);
+      _mostrarSnackBar(
+        "Error al capturar la imagen: $e",
+        backgroundColor: Colors.red,
+      );
     }
   }
 
@@ -143,6 +180,8 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _cerrarSesion() async {
+    await _apagarCamara();
+    if (!mounted) return;
     await context.read<AuthProvider>().logout();
 
     if (mounted) {
@@ -157,6 +196,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     super.dispose();
   }
 
@@ -169,7 +209,7 @@ class _CameraScreenState extends State<CameraScreen> {
     final String avatarUrl = usuario?.avatarUrl ?? '';
     final int puntos = usuario?.puntos ?? 0;
     final String rol = usuario?.rol ?? 'USER';
-    final String nombreCurso = usuario?.curso?.nombre ?? 'Sin curso' ;
+    final String nombreCurso = usuario?.curso?.nombre ?? 'Sin curso';
 
     return Scaffold(
       appBar: AppBar(
@@ -274,7 +314,11 @@ class _CameraScreenState extends State<CameraScreen> {
               width: double.infinity,
               color: Colors.black,
               child: Center(
-                child: _isCameraInitialized
+                child:
+                    (_isCameraInitialized &&
+                        _controller != null &&
+                        _controller!.value.isInitialized &&
+                        _controller!.value.previewSize != null)
                     ? AspectRatio(
                         aspectRatio: _controller!.value.aspectRatio,
                         child: CameraPreview(_controller!),
@@ -317,23 +361,36 @@ class _CameraScreenState extends State<CameraScreen> {
                         return ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber[800],
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                           ),
-                          onPressed: iaProv.cargandoIA ? null : () => _capturarYProcesar(context),
+                          onPressed: iaProv.cargandoIA
+                              ? null
+                              : () => _capturarYProcesar(context),
                           icon: iaProv.cargandoIA
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
                                 )
-                              : const Icon(Icons.camera_alt, color: Colors.white),
+                              : const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                ),
                           label: Text(
-                            iaProv.cargandoIA ? 'Procesando...' : 'Tomar Foto y Procesar',
+                            iaProv.cargandoIA
+                                ? 'Procesando...'
+                                : 'Tomar Foto y Procesar',
                             style: const TextStyle(color: Colors.white),
                           ),
                         );
                       },
-                    )     
+                    )
                   else
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
